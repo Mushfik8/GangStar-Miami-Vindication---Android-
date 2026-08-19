@@ -84,10 +84,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         this.viewWidth = width;
         this.viewHeight = height;
 
-        // Visual portrait aspect ratio is 480x800
-        float visualW = 480f;
-        float visualH = 800f;
-        float gameAspect = visualW / visualH;
+        // Native 800x480 landscape aspect ratio
+        float gameAspect = 800f / 480f;
         float viewAspect = (float) width / (float) height;
 
         float destW, destH, destX, destY;
@@ -105,16 +103,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
         dstRect.set(destX, destY, destX + destW, destY + destH);
 
-        // Transform original 800x480 J2ME frame -> 90 deg clockwise to 480x800 visual portrait
         drawMatrix.reset();
-        drawMatrix.postRotate(90);
-        drawMatrix.postTranslate(480, 0);
-        drawMatrix.postScale(destW / visualW, destH / visualH);
+        drawMatrix.postScale(destW / 800f, destH / 480f);
         drawMatrix.postTranslate(destX, destY);
 
         drawMatrix.invert(touchInvertMatrix);
 
-        touchHUD.setGameViewport(destX, destY, destW, destH, destW / visualW);
+        touchHUD.setGameViewport(destX, destY, destW, destH, destW / 800f);
         touchHUD.setTouchInvertMatrix(touchInvertMatrix);
         touchHUD.updateLayout(width, height);
     }
