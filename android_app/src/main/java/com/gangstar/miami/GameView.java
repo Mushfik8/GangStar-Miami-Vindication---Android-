@@ -24,6 +24,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
     private final Rect srcRect = new Rect();
     private final RectF dstRect = new RectF();
+    private final android.graphics.Matrix drawMatrix = new android.graphics.Matrix();
+    private final android.graphics.Matrix touchInvertMatrix = new android.graphics.Matrix();
 
     public static String crashStackTrace = null;
     private final Paint errorPaint = new Paint();
@@ -82,8 +84,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         this.viewWidth = width;
         this.viewHeight = height;
 
-        // Calculate aspect-ratio fit for 800x480 J2ME game
-        float gameAspect = 800f / 480f;
+        // Visual portrait aspect ratio is 480x800
+        float visualW = 480f;
+        float visualH = 800f;
+        float gameAspect = visualW / visualH;
         float viewAspect = (float) width / (float) height;
 
         float destW, destH, destX, destY;
@@ -100,8 +104,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         }
 
         dstRect.set(destX, destY, destX + destW, destY + destH);
-        float scale = destW / 800f;
-        touchHUD.setGameViewport(destX, destY, destW, destH, scale);
+
+        // Transform original 800x480 J2ME frame -> 90 deg clockwise to 480x800 visual portrait
+        drawMatrix.reset();
+        drawMatrix.postRotate(90);
+        drawMatrix.postTranslate(480, 0);
+        drawMatrix.postScale(destW / visualW, destH / visualH);
+        drawMatrix.postTranslate(destX, destY);
+
+        drawMatrix.invert(touchInvertMatrix);
+
+        touchHUD.setGameViewport(destX, destY, destW, destH, destW / visualW);
+        touchHUD.setTouchInvertMatrix(touchInvertMatrix);
         touchHUD.updateLayout(width, height);
     }
 
@@ -197,8 +211,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                             if (jCanvas != null) {
                                 Bitmap bmp = jCanvas.getOffscreenBitmap();
                                 if (bmp != null) {
-                                    srcRect.set(0, 0, bmp.getWidth(), bmp.getHeight());
-                                    canvas.drawBitmap(bmp, srcRect, dstRect, paint);
+                                    canvas.drawBitmap(bmp, drawMatrix, paint);
                                 }
                             }
 
