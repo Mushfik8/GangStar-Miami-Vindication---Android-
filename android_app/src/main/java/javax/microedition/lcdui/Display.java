@@ -26,6 +26,10 @@ public class Display {
         appContext = context;
     }
 
+    public static Context getAppContext() {
+        return appContext;
+    }
+
     public static Display getActiveDisplay() {
         return activeDisplay;
     }

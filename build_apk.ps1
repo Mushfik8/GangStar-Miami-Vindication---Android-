@@ -59,7 +59,7 @@ $AlignedApk = "$BinDir\aligned.apk"
 & "$BuildToolsDir\zipalign.exe" -f -v 4 "$BinDir\unaligned.apk" $AlignedApk
 
 Write-Host "=== 9. Creating Keystore and Signing APK ==="
-$Keystore = "$BuildDir\debug.keystore"
+$Keystore = "$ProjectDir\debug.keystore"
 if (-not (Test-Path $Keystore)) {
     & $Keytool -genkeypair -v -keystore $Keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 }

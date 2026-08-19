@@ -15,7 +15,7 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStore;
 
-public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback, Runnable, Thread.UncaughtExceptionHandler {
     private Thread gameThread;
     private volatile boolean isRunning = false;
     private final TouchHUD touchHUD;
@@ -24,6 +24,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
 
     private final Rect srcRect = new Rect();
     private final RectF dstRect = new RectF();
+
+    public static String crashStackTrace = null;
+    private final Paint errorPaint = new Paint();
 
     private int viewWidth = 800;
     private int viewHeight = 480;
@@ -50,8 +53,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         paint.setAntiAlias(true);
         bgPaint.setColor(Color.BLACK);
 
+        errorPaint.setColor(Color.RED);
+        errorPaint.setTextSize(30f);
+        errorPaint.setAntiAlias(true);
+        Thread.setDefaultUncaughtExceptionHandler(this);
+
         Display.setAppContext(context.getApplicationContext());
         RecordStore.init(context.getApplicationContext());
+    }
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        e.printStackTrace();
+        java.io.StringWriter sw = new java.io.StringWriter();
+        e.printStackTrace(new java.io.PrintWriter(sw));
+        crashStackTrace = "Crash on thread " + t.getName() + ":\n" + sw.toString();
     }
 
     @Override
@@ -135,6 +151,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                 midlet.startApp();
             } catch (Throwable t) {
                 t.printStackTrace();
+                java.io.StringWriter sw = new java.io.StringWriter();
+                t.printStackTrace(new java.io.PrintWriter(sw));
+                crashStackTrace = sw.toString();
             }
         }
     }
@@ -166,17 +185,26 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
                         // 1. Draw black background
                         canvas.drawRect(0, 0, viewWidth, viewHeight, bgPaint);
 
-                        // 2. Draw J2ME game frame
-                        if (jCanvas != null) {
-                            Bitmap bmp = jCanvas.getOffscreenBitmap();
-                            if (bmp != null) {
-                                srcRect.set(0, 0, bmp.getWidth(), bmp.getHeight());
-                                canvas.drawBitmap(bmp, srcRect, dstRect, paint);
+                        if (crashStackTrace != null) {
+                            String[] lines = crashStackTrace.split("\n");
+                            float y = 50f;
+                            for (String line : lines) {
+                                canvas.drawText(line, 20f, y, errorPaint);
+                                y += 35f;
                             }
-                        }
+                        } else {
+                            // 2. Draw J2ME game frame
+                            if (jCanvas != null) {
+                                Bitmap bmp = jCanvas.getOffscreenBitmap();
+                                if (bmp != null) {
+                                    srcRect.set(0, 0, bmp.getWidth(), bmp.getHeight());
+                                    canvas.drawBitmap(bmp, srcRect, dstRect, paint);
+                                }
+                            }
 
-                        // 3. Draw GTA Vice City touch HUD
-                        touchHUD.draw(canvas);
+                            // 3. Draw GTA Vice City touch HUD
+                            touchHUD.draw(canvas);
+                        }
                     }
                 } finally {
                     if (canvas != null) {

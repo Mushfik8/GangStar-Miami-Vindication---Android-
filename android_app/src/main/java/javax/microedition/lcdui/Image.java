@@ -20,39 +20,61 @@ public class Image {
         return new Image(bmp, true);
     }
 
-    public static Image createImage(String name) throws IOException {
-        if (name == null) throw new NullPointerException("Resource name is null");
-        InputStream is = null;
+    public static InputStream getResourceAsStream(String name) {
+        if (name == null) return null;
+        String clean = name.startsWith("/") ? name.substring(1) : name;
+        String withSlash = "/" + clean;
+        
         try {
-            // Try with leading slash
-            String path = name.startsWith("/") ? name : "/" + name;
-            is = Image.class.getResourceAsStream(path);
-            if (is == null) {
-                // Try without leading slash
-                String pathNoSlash = name.startsWith("/") ? name.substring(1) : name;
-                is = Image.class.getClassLoader().getResourceAsStream(pathNoSlash);
+            InputStream is = Image.class.getResourceAsStream(withSlash);
+            if (is != null) return is;
+        } catch (Throwable ignored) {}
+
+        try {
+            ClassLoader cl = Image.class.getClassLoader();
+            if (cl != null) {
+                InputStream is = cl.getResourceAsStream(clean);
+                if (is != null) return is;
+                is = cl.getResourceAsStream("assets/" + clean);
+                if (is != null) return is;
             }
-            if (is == null) {
-                // Try Android AssetManager if available via Display
-                is = getAssetStream(name);
+        } catch (Throwable ignored) {}
+
+        try {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl != null) {
+                InputStream is = cl.getResourceAsStream(clean);
+                if (is != null) return is;
+                is = cl.getResourceAsStream("assets/" + clean);
+                if (is != null) return is;
             }
-            if (is == null) {
-                throw new IOException("Resource not found: " + name);
+        } catch (Throwable ignored) {}
+
+        try {
+            android.content.Context ctx = Display.getAppContext();
+            if (ctx != null) {
+                return ctx.getAssets().open(clean);
             }
-            return createImage(is);
-        } finally {
-            if (is != null) {
-                try { is.close(); } catch (Exception ignored) {}
-            }
-        }
+        } catch (Throwable ignored) {}
+
+        return null;
     }
 
     public static InputStream getAssetStream(String name) {
+        return getResourceAsStream(name);
+    }
+
+    public static Image createImage(String name) throws IOException {
+        if (name == null) throw new NullPointerException("Resource name is null");
+        InputStream is = getResourceAsStream(name);
+        if (is == null) {
+            throw new IOException("Resource not found: " + name);
+        }
         try {
-            String clean = name.startsWith("/") ? name.substring(1) : name;
-            return Image.class.getClassLoader().getResourceAsStream("assets/" + clean);
-        } catch (Exception ignored) {}
-        return null;
+            return createImage(is);
+        } finally {
+            try { is.close(); } catch (Exception ignored) {}
+        }
     }
 
     public static Image createImage(InputStream stream) throws IOException {
