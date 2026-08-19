@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GangStar: Miami Vindication - Android & Touch Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- CheerpJ 3 J2ME runtime -->
+    <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation / Status -->
+        <header class="top-nav">
+            <div class="logo-area">
+                <img src="icon.png" alt="GangStar Icon" class="app-icon">
+                <div>
+                    <h1 class="game-title">GANGSTAR: MIAMI VINDICATION</h1>
+                    <span class="game-subtitle">GTA Vice City Mobile Touch Edition</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="Gangstar_Miami_Android.apk" download class="btn-download" id="apkDownloadBtn">
+                    <span class="icon">📥</span> DOWNLOAD ANDROID APK (4.45 MB)
+                </a>
+                <button class="btn-mode" id="btnModeToggle">🚗 DRIVING MODE</button>
+                <button class="btn-opacity" id="btnOpacityToggle">👁 HUD: 70%</button>
+            </div>
+        </header>
+
+        <!-- Game Screen Area with Touch Overlay -->
+        <main class="game-wrapper" id="gameWrapper">
+            <div class="screen-frame">
+                <div id="gameContainer" class="game-container">
+                    <div id="loadingOverlay" class="loading-overlay">
+                        <div class="spinner"></div>
+                        <p class="loading-text">LAUNCHING GANGSTAR MIAMI VINDICATION...</p>
+                        <p class="loading-subtext">Optimizing 800x480 Widescreen & Touch Canvas</p>
+                        <button id="btnStartGame" class="btn-start">▶ START GAME</button>
+                    </div>
+                </div>
+
+                <!-- GTA Vice City Touch Controls Overlay -->
+                <div class="touch-hud" id="touchHud">
+                    <!-- Top Utility Row -->
+                    <div class="hud-top-bar">
+                        <button class="hud-btn hud-pill" id="hudSoft1" data-key="-6">❚❚ PAUSE</button>
+                        <button class="hud-btn hud-pill" id="hudPrevWep" data-key="49">◄ WEP</button>
+                        <button class="hud-btn hud-pill" id="hudNextWep" data-key="51">WEP ►</button>
+                        <button class="hud-btn hud-pill" id="hudSoft2" data-key="-7">🗺 MENU</button>
+                    </div>
+
+                    <!-- Driving Mode Layout -->
+                    <div class="hud-layer hud-driving-mode active" id="layerDriving">
+                        <!-- Left: Steering -->
+                        <div class="hud-cluster cluster-steer">
+                            <button class="hud-btn hud-horn" id="btnHorn" data-key="35">
+                                <span class="label">📢</span>
+                                <span class="sub">HORN</span>
+                            </button>
+                            <div class="steer-row">
+                                <button class="hud-btn hud-steer" id="btnSteerLeft" data-key="52">
+                                    <span class="label">◀</span>
+                                    <span class="sub">LEFT</span>
+                                </button>
+                                <button class="hud-btn hud-steer" id="btnSteerRight" data-key="54">
+                                    <span class="label">▶</span>
+                                    <span class="sub">RIGHT</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Pedals & Car Actions -->
+                        <div class="hud-cluster cluster-pedals">
+                            <div class="action-column">
+                                <button class="hud-btn hud-action" id="btnExitCar" data-key="53">
+                                    <span class="label">🚗</span>
+                                    <span class="sub">EXIT</span>
+                                </button>
+                                <button class="hud-btn hud-handbrake" id="btnHandbrake" data-key="55">
+                                    <span class="label">✋</span>
+                                    <span class="sub">DRIFT</span>
+                                </button>
+                            </div>
+                            <button class="hud-btn hud-pedal-brake" id="btnBrake" data-key="56">
+                                <span class="label">BRAKE</span>
+                                <span class="sub">REVERSE</span>
+                            </button>
+                            <button class="hud-btn hud-pedal-gas" id="btnGas" data-key="50">
+                                <span class="label">GAS</span>
+                                <span class="sub">FORWARD</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- On-Foot Mode Layout -->
+                    <div class="hud-layer hud-foot-mode" id="layerFoot">
+                        <!-- Left: D-Pad -->
+                        <div class="hud-cluster cluster-dpad">
+                            <div class="dpad-grid">
+                                <div></div>
+                                <button class="hud-btn hud-dpad-btn" id="btnFootUp" data-key="50">▲</button>
+                                <div></div>
+                                <button class="hud-btn hud-dpad-btn" id="btnFootLeft" data-key="52">◀</button>
+                                <div class="dpad-center"></div>
+                                <button class="hud-btn hud-dpad-btn" id="btnFootRight" data-key="54">▶</button>
+                                <div></div>
+                                <button class="hud-btn hud-dpad-btn" id="btnFootDown" data-key="56">▼</button>
+                                <div></div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Actions -->
+                        <div class="hud-cluster cluster-foot-actions">
+                            <button class="hud-btn hud-round hud-sprint" id="btnSprint" data-key="55">
+                                <span class="label">⚡</span>
+                                <span class="sub">SPRINT</span>
+                            </button>
+                            <button class="hud-btn hud-round hud-enter-car" id="btnEnterCar" data-key="42">
+                                <span class="label">🚗</span>
+                                <span class="sub">CAR</span>
+                            </button>
+                            <button class="hud-btn hud-round hud-shoot" id="btnShoot" data-key="53">
+                                <span class="label">🎯</span>
+                                <span class="sub">ATTACK</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Information & Controls Guide Footer -->
+        <footer class="info-footer">
+            <div class="info-card">
+                <h3>🎮 HOLD-TO-MOVE TOUCH CONTROLS</h3>
+                <p>Designed like <strong>GTA Vice City Mobile</strong>: Pressing and holding the <strong>GAS</strong> or direction button drives/moves continuously. <strong>Releasing the button stops the car immediately!</strong></p>
+            </div>
+            <div class="info-card">
+                <h3>📱 ANDROID APK INSTALLATION</h3>
+                <p>The compiled Android app <a href="Gangstar_Miami_Android.apk" class="apk-link">Gangstar_Miami_Android.apk</a> is signed and ready. Download and install on any Android phone (Android 5.0 to 14+ supported).</p>
+            </div>
+            <div class="info-card">
+                <h3>⌨ KEYBOARD SHORTCUTS</h3>
+                <p><strong>W / Up:</strong> Gas / Forward | <strong>S / Down:</strong> Brake / Reverse | <strong>A / D:</strong> Steer Left / Right | <strong>Space / 5:</strong> Attack / Action | <strong>Shift / 7:</strong> Drift / Sprint</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
